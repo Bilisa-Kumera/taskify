@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:task/main.dart';
 import 'package:task/model/task_model.dart';
 import 'package:task/provider/task_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -73,9 +74,8 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
       });
     }
   }
-Future<void> _scheduleNotification(Task task) async {
-  final now = DateTime.now();
 
+Future<void> _scheduleNotification(Task task) async {
   if (_dueDate != null) {
     final taskDateTime = DateTime(
       _dueDate!.year,
@@ -85,45 +85,40 @@ Future<void> _scheduleNotification(Task task) async {
       _dueTime?.minute ?? 0,
     );
 
-    // Check if the task due time is in the future
-    if (taskDateTime.isAfter(now)) {
-      print('Scheduling notification for: $taskDateTime');
+    if (taskDateTime.isAfter(DateTime.now())) {
+      final tz.TZDateTime scheduledDate = tz.TZDateTime.from(
+        taskDateTime,
+        tz.local, // This uses the local timezone
+      );
 
-      // Convert DateTime to TZDateTime for notification scheduling
-      final tz.TZDateTime tzDateTime = tz.TZDateTime.from(taskDateTime, tz.local);
-      print('Converted to TZDateTime: $tzDateTime');
+      final int notificationId = task.id ?? DateTime.now().millisecondsSinceEpoch % 2147483647;
 
-      // Define Android notification details
-      final androidDetails = AndroidNotificationDetails(
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
         'task_channel',
         'Task Notifications',
-        channelDescription: 'Notifications for tasks due soon',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
+        showWhen: false,
       );
 
-      // Define NotificationDetails for Android (you can add iOS details too)
-      final notificationDetails = NotificationDetails(android: androidDetails);
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
 
-      // Schedule the notification
-      await _notificationsPlugin.zonedSchedule(
-        task.id ?? DateTime.now().millisecondsSinceEpoch % 2147483647, // Ensure 32-bit integer
-        'Task Due',
-        'Your task "${task.title}" is due now!',
-        tzDateTime,
-        notificationDetails,
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        notificationId,
+        'Task Reminder',
+        'Reminder for task: ${task.title}',
+        scheduledDate,
+        platformChannelSpecifics,
         androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
       );
-
-      print('Notification scheduled for: ${task.title} at $tzDateTime');
-    } else {
-      print('Task due time is not in the future: $taskDateTime');
     }
-  } else {
-    print('Due date is null, cannot schedule notification.');
   }
 }
+
 
 
   @override
@@ -229,40 +224,41 @@ Future<void> _scheduleNotification(Task task) async {
                 decoration: InputDecoration(labelText: 'Task Status'),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    final newTask = Task(
-                      id: widget.task?.id,
-                      title: _title!,
-                      description: _description!,
-                      dueDate: _dueDate ?? DateTime.now(),
-                      isCompleted: _isCompleted,
-                    );
+             ElevatedButton(
+  onPressed: () {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      final newTask = Task(
+        id: widget.task?.id,
+        title: _title!,
+        description: _description!,
+        dueDate: _dueDate ?? DateTime.now(),
+        isCompleted: _isCompleted,
+      );
 
-                    if (widget.task == null) {
-                      Provider.of<TaskProvider>(context, listen: false)
-                          .addTask(newTask);
-                    } else {
-                      Provider.of<TaskProvider>(context, listen: false)
-                          .updateTask(newTask);
-                    }
+      if (widget.task == null) {
+        Provider.of<TaskProvider>(context, listen: false)
+            .addTask(newTask);
+      } else {
+        Provider.of<TaskProvider>(context, listen: false)
+            .updateTask(newTask);
+      }
 
-                    if (_dueDate != null) {
-                      _scheduleNotification(newTask);
-                    }
+      if (_dueDate != null) {
+        _scheduleNotification(newTask);
+      }
 
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(widget.task == null ? 'Add Task' : 'Update Task'),
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.deepPurple,
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                  textStyle: TextStyle(fontSize: 16),
-                ),
-              ),
+      Navigator.pop(context);
+    }
+  },
+  child: Text(widget.task == null ? 'Add Task' : 'Update Task'),
+  style: ElevatedButton.styleFrom(
+    primary: Colors.deepPurple,
+    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+    textStyle: TextStyle(fontSize: 16),
+  ),
+)
+
             ],
           ),
         ),

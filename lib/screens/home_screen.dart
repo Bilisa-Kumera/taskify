@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:task/model/task_model.dart';
 import 'package:task/provider/task_provider.dart';
+import 'package:task/screens/add_edit_screen.dart';
 import 'package:task/screens/completed_task_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -187,34 +189,41 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+void _showTaskOptionsDialog(
+    BuildContext context, TaskProvider taskProvider, Task task) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Task Options"),
+        content: Text("Choose an action for the task '${task.title}'"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              // Mark the task as complete
+              taskProvider.completeTask(task);
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text("Finish"),
+          ),
+          TextButton(
+            onPressed: () {
+              // Navigate to AddEditTaskScreen for editing the task
+              Navigator.of(context).pop(); // Close the dialog first
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => AddEditTaskScreen(task: task),
+                ),
+              );
+            },
+            child: const Text("Edit"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
-  void _showTaskOptionsDialog(BuildContext context, TaskProvider taskProvider, task) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Task Options"),
-          content: Text("Choose an action for the task '${task.title}'"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                taskProvider.completeTask(task);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Finish"),
-            ),
-            TextButton(
-              onPressed: () {
-                taskProvider.removeTask(task);
-                Navigator.of(context).pop();
-              },
-              child: const Text("Remove"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
