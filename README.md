@@ -1,16 +1,21 @@
-# task
+# Taskify
 
-A new Flutter project.
+A new Flutter project that manages your tasks.
 
 ## Getting Started
 
 This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+To run this app:
+1. Install IDE like android studio or vs code
+2. install flutter on your IDE
+3. flutter pub get dependencies
+4. flutter run or flutter upgrade
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Features of the app:
+1. Add tasks
+2. Delete tasks (swap to the left)
+3. Quotes
+4. Local notifications
+5. Completed tasks view
