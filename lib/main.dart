@@ -14,20 +14,18 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 final ThemeData lightTheme = ThemeData(
   primarySwatch: Colors.deepPurple,
   brightness: Brightness.light,
-  // Define light theme properties here
 );
 
 final ThemeData darkTheme = ThemeData(
   primarySwatch: Colors.deepPurple,
   brightness: Brightness.dark,
-  // Define dark theme properties here
 );
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  tz.initializeTimeZones(); // Initialize time zone database
-  tz.setLocalLocation(tz.getLocation('America/New_York')); // Set your preferred time zone
+  tz.initializeTimeZones(); 
+  tz.setLocalLocation(tz.getLocation('America/New_York')); 
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -42,8 +40,8 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TaskProvider()), // Initialize TaskProvider
-        ChangeNotifierProvider(create: (_) => ThemeProvider()), // Initialize ThemeProvider
+        ChangeNotifierProvider(create: (_) => TaskProvider()), 
+        ChangeNotifierProvider(create: (_) => ThemeProvider()), 
       ],
       child: const MyApp(),
     ),
@@ -71,8 +69,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Taskify',
       theme: lightTheme,
-      // darkTheme: darkTheme,
-      // themeMode: _themeMode,
+      darkTheme: darkTheme,
+      themeMode: _themeMode,
       onGenerateRoute: AppRouter.generateRoute,
       initialRoute: '/',
     );
